@@ -1,97 +1,112 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
-import { auth, db } from "./firebase";
-import { setDoc, doc } from "firebase/firestore";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 import { toast } from "react-toastify";
+import "./login.css"; // Sử dụng chung file CSS với login
 
-function Register() {
+const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fname, setFname] = useState("");
-  const [lname, setLname] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [role, setRole] = useState("user"); // Mặc định là User
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      const user = auth.currentUser;
-      console.log(user);
-      if (user) {
-        await setDoc(doc(db, "Users", user.uid), {
-          email: user.email,
-          firstName: fname,
-          lastName: lname,
-          photo:""
-        });
-      }
-      console.log("User Registered Successfully!!");
-      toast.success("User Registered Successfully!!", {
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Lưu thông tin người dùng vào Firestore
+      await setDoc(doc(db, "users", user?.uid), {
+        email: user.email,
+        displayName,
+        role, // Vai trò được chọn từ form
+        createdAt: new Date().toISOString(),
+      });
+
+      toast.success("Registration successful!", {
         position: "top-center",
       });
+
+      // Làm mới lại trang sau khi đăng ký thành công
+      setEmail("");
+      setPassword("");
+      setDisplayName("");
+      setRole("user");
     } catch (error) {
-      console.log(error.message);
-      toast.error(error.message, {
-        position: "bottom-center",
+      console.error("Error registering user:", error);
+      toast.error(`Error: ${error.message}`, {
+        position: "top-center",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleRegister}>
-      <h3>Sign Up</h3>
-
-      <div className="mb-3">
-        <label>First name</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="First name"
-          onChange={(e) => setFname(e.target.value)}
-          required
-        />
+    <form className="auth-wrapper" onSubmit={handleRegister}>
+      <div className="auth-inner">
+        <h3>Register</h3>
+        <div className="mb-3">
+          <label>Full Name</label>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Enter your full name"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Email address</label>
+          <input
+            type="email"
+            className="form-control"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Password</label>
+          <input
+            type="password"
+            className="form-control"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Role</label>
+          <select
+            className="form-control"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
+            <option value="user">User</option>
+            <option value="manager">HR Manager</option>
+          </select>
+        </div>
+        <div className="d-grid">
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </div>
+        <p className="forgot-password text-right">
+          Already registered? <a href="/login">Log in</a>
+        </p>
       </div>
-
-      <div className="mb-3">
-        <label>Last name</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Last name"
-          onChange={(e) => setLname(e.target.value)}
-        />
-      </div>
-
-      <div className="mb-3">
-        <label>Email address</label>
-        <input
-          type="email"
-          className="form-control"
-          placeholder="Enter email"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="mb-3">
-        <label>Password</label>
-        <input
-          type="password"
-          className="form-control"
-          placeholder="Enter password"
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="d-grid">
-        <button type="submit" className="btn btn-primary">
-          Sign Up
-        </button>
-      </div>
-      <p className="forgot-password text-right">
-        Already registered <a href="/login">Login</a>
-      </p>
     </form>
   );
-}
+};
+
 export default Register;
