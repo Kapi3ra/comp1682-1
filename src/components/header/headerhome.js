@@ -35,6 +35,9 @@ const HeaderHome = ({ user }) => {
             <li>
               <Link to="/joblist">Jobs</Link>
             </li>
+            <li>
+              <Link to="/statistics">Statistics</Link> {/* Thêm mục Statistics */}
+            </li>
             {user && user.email === "admin@example.com" && (
               <li>
                 <Link to="/manageapplications">Applications</Link>

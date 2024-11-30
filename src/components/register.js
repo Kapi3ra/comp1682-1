@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { toast } from "react-toastify";
@@ -29,11 +29,15 @@ const Register = () => {
         createdAt: new Date().toISOString(),
       });
 
-      toast.success("Registration successful!", {
+      // Đăng xuất ngay sau khi đăng ký để tránh đăng nhập tự động
+      await signOut(auth);
+
+      // Hiển thị thông báo thành công
+      toast.success("Registration successful! You can now log in.", {
         position: "top-center",
       });
 
-      // Làm mới lại trang sau khi đăng ký thành công
+      // Làm mới lại form
       setEmail("");
       setPassword("");
       setDisplayName("");
