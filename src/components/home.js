@@ -1,64 +1,68 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
+import { Link } from "react-router-dom";
 
 const Home = ({ user }) => {
-  const [homeData, setHomeData] = useState([]); // Dữ liệu từ bộ sưu tập "home_data"
-  const [displayName, setDisplayName] = useState("Guest"); // Tên người dùng mặc định
-  const [error, setError] = useState(null); // Trạng thái lỗi
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Lấy thông tin người dùng từ Firestore
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user || !user.uid) return; // Kiểm tra nếu không có thông tin user
-
+    const fetchJobs = async () => {
       try {
-        const userDocRef = doc(db, "users", user.uid); // Truy vấn tài liệu người dùng
-        const userDocSnap = await getDoc(userDocRef);
+        const jobsSnapshot = await getDocs(collection(db, "jobs"));
+        const allJobs = jobsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-        if (userDocSnap.exists()) {
-          const userData = userDocSnap.data();
-          setDisplayName(userData.displayName || "No Name"); // Gán tên người dùng hoặc mặc định
+        if (user) {
+          // Fetch user-applied jobs
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          const appliedJobIds = userData.appliedJobs || []; // Fetch applied jobs for the user
+
+          // Filter out jobs the user has already applied for
+          const newJobs = allJobs.filter((job) => !appliedJobIds.includes(job.id));
+          setJobs(newJobs);
         } else {
-          console.error("User document does not exist.");
-          setDisplayName("Unknown User");
+          // If no user, show all jobs
+          setJobs(allJobs);
         }
-      } catch (err) {
-        setError(`Failed to fetch user data: ${err.message}`);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserData();
+    fetchJobs();
   }, [user]);
 
-  // Lấy dữ liệu từ bộ sưu tập "home_data"
-  useEffect(() => {
-    const fetchHomeData = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, "home_data")); // Lấy dữ liệu từ bộ sưu tập
-        const items = snapshot.docs.map((doc) => doc.data()); // Chuyển đổi tài liệu thành dữ liệu
-        setHomeData(items);
-      } catch (err) {
-        setError(`Failed to fetch home data: ${err.message}`);
-      }
-    };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-    fetchHomeData();
-  }, []);
-
-  // Hiển thị lỗi nếu có
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (jobs.length === 0) {
+    return <div>No new jobs available.</div>;
   }
 
   return (
-    <div>
-      <h1>Welcome, {displayName}!</h1> {/* Hiển thị tên người dùng */}
-      <ul>
-        {homeData.map((item, index) => (
-          <li key={index}>{item.name}</li>
+    <div className="container mt-4">
+      <h1>Welcome to the Job Board</h1>
+      <h2>New Jobs Available</h2>
+      <div className="job-list">
+        {jobs.map((job) => (
+          <div key={job.id} className="card mb-3">
+            <div className="card-body">
+              <h5 className="card-title">{job.title}</h5>
+              <p className="card-text"><strong>Company:</strong> {job.company}</p>
+              <p className="card-text"><strong>Location:</strong> {job.location}</p>
+              <p className="card-text"><strong>Posted:</strong> {job.postedDate}</p>
+              <Link to={`/jobdetails/${job.id}`} className="btn btn-primary">
+                View Details
+              </Link>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

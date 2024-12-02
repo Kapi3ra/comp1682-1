@@ -5,24 +5,25 @@ import "./App.css";
 
 // Import Firebase
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { db } from "./components/firebase"; // Nếu firebase.js nằm ở thư mục components
+import { db } from "./components/firebase"; // Firebase configuration
 import { doc, getDoc } from "firebase/firestore";
 
-// Import các trang
+// Import pages
 import Login from "./components/login";
 import Register from "./components/register";
 import JobForm from "./components/job/jobform";
 import JobDetails from "./components/job/jobdetails";
 import JobList from "./components/job/joblist";
-import JobApplicants from "./components/job/jobapplicants"; // Sửa tên import
-
+import JobApplicants from "./components/job/jobapplicants";
+import Home from "./components/home"; // Import Home page
+import Profile from "./components/profile";
 
 // Import Header
 import HeaderHome from "./components/header/headerhome";
 
 const App = () => {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null); // Vai trò của người dùng
+  const [role, setRole] = useState(null); // User role
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
@@ -35,7 +36,7 @@ const App = () => {
         try {
           const userDoc = await getDoc(doc(db, "users", currentUser.uid));
           if (userDoc.exists()) {
-            setRole(userDoc.data().role); // Lấy role từ Firestore
+            setRole(userDoc.data().role); // Fetch role from Firestore
           }
         } catch (error) {
           console.error("Error fetching user role:", error);
@@ -61,13 +62,26 @@ const App = () => {
       {!isAuthPage && <HeaderHome user={user} />}
       <div className="content-wrapper">
         <Routes>
-          <Route path="/login" element={user ? <Navigate to="/joblist" /> : <Login />} />
+          <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+          <Route path="/home" element={<Home user={user} />} /> {/* Add Home route */}
+          <Route path="/login" element={user ? <Navigate to="/home" /> : <Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/joblist" element={<JobList user={user} role={role} />} />          <Route path="/createjob" element={role === "manager" ? <JobForm /> : <Navigate to="/login" />} />
-          <Route path="/editjob/:jobId" element={role === "manager" ? <JobForm /> : <Navigate to="/login" />} />
-          <Route path="/jobdetails/:jobId" element={<JobDetails user={user} role={role} />} />        
-          <Route path="/jobapplicants/:jobId"element={role === "manager" ? <JobApplicants /> : <Navigate to="/login" />}/>
-          </Routes>
+          <Route path="/joblist" element={<JobList user={user} role={role} />} />
+          <Route
+            path="/createjob"
+            element={role === "manager" ? <JobForm /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/editjob/:jobId"
+            element={role === "manager" ? <JobForm /> : <Navigate to="/login" />}
+          />
+          <Route path="/jobdetails/:jobId" element={<JobDetails user={user} role={role} />} />
+          <Route
+            path="/jobapplicants/:jobId"
+            element={role === "manager" ? <JobApplicants /> : <Navigate to="/login" />}
+          />
+          <Route path="/profile" element={<Profile user={user} />} />
+        </Routes>
       </div>
     </>
   );

@@ -1,40 +1,43 @@
+/* Tổng thể header */
 .navbar {
     padding: 10px 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.navbar .container {
+  }
+  
+  .navbar .container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     max-width: 1200px;
     margin: 0 auto;
-}
-
-.navbar .logo img {
+  }
+  
+  /* Logo */
+  .navbar .logo img {
     height: 50px;
-}
-
-.navbar .nav .nav-links {
+  }
+  
+  /* Danh sách navigation */
+  .navbar .nav .nav-links {
     display: flex;
     list-style: none;
-}
-
-.navbar .nav .nav-links li {
+  }
+  
+  .navbar .nav .nav-links li {
     margin-right: 20px;
-}
-
-.navbar .nav .nav-links li a {
+  }
+  
+  .navbar .nav .nav-links li a {
     text-decoration: none;
     font-weight: 500;
     padding-bottom: 5px;
     position: relative;
     transition: color 0.3s ease;
-}
-
-.navbar .nav .nav-links li a.active::after {
+  }
+  
+  .navbar .nav .nav-links li a.active::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -44,134 +47,30 @@
     background-color: currentColor;
     border-radius: 2px;
     transition: width 0.3s ease;
-}
-
-.navbar .nav .nav-links li a:hover {
+  }
+  
+  .navbar .nav .nav-links li a:hover {
     color: inherit;
-}
-
-.navbar .search-cart {
-    display: flex;
-    align-items: center;
-}
-
-.navbar .search-cart .search-box {
-    display: flex;
-    align-items: center;
-    border-radius: 20px;
-    padding: 5px 10px;
-    margin-right: 20px;
-}
-
-.navbar .search-cart .search-box input {
-    border: none;
-    background: none;
-    outline: none;
-    padding: 5px;
-    width: 120px;
-}
-
-.navbar .search-cart .search-box button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-}
-
-.navbar.home-page {
-    background-color: #fafafa;
-    color: rgb(224, 93, 61);
-}
-
-.navbar.home-page a {
-    color: rgb(16, 16, 16);
-}
-
-.navbar.home-page a:hover {
-    color: #ffd700;
-}
-
-.navbar.other-page {
-    background-color: white;
-    color: #333;
-}
-
-.navbar.other-page a {
-    color: #007acc;
-}
-
-.navbar.other-page a:hover {
-    color: #005a8d;
-}
-
-.user-icon {
-    position: relative;
-}
-
-.user-icon .anticon {
-    color: #333;
-    transition: color 0.3s ease;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.user-icon .anticon:hover {
-    color: #000;
-}
-
-.user-icon .dropdown {
-    position: absolute;
-    top: 120%;
-    right: 0;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    transform: translateY(20px);
-    opacity: 0;
-    visibility: hidden;
-    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s;
-}
-
-.user-icon .dropdown-item {
-    padding: 8px 12px;
-    text-decoration: none;
-    color: #333;
-    transition: background-color 0.3s ease;
-}
-
-.user-icon .dropdown-item:hover {
-    background-color: #f0f0f0;
-}
-
-.user-icon.show-dropdown .dropdown {
-    transform: translateY(0);
-    opacity: 1;
-    visibility: visible;
-}
-
-.user-dropdown {
+  }
+  
+  /* Phần user dropdown */
+  .user-dropdown {
     position: relative;
     display: inline-block;
-}
-
-.user-dropdown span {
+  }
+  
+  .user-dropdown span {
     color: #515255;
     font-weight: bold;
     cursor: pointer;
     transition: color 0.3s ease;
-}
-
-.user-dropdown span:hover {
+  }
+  
+  .user-dropdown span:hover {
     color: #E55B13;
-}
-
-.user-dropdown .dropdown-menu {
+  }
+  
+  .user-dropdown .dropdown-menu {
     position: absolute;
     top: 30px;
     right: 0;
@@ -184,32 +83,64 @@
     text-align: left;
     display: flex;
     flex-direction: column;
-}
-
-.user-dropdown .dropdown-menu .dropdown-item {
+  }
+  
+  .user-dropdown .dropdown-menu .dropdown-item {
     padding: 8px 12px;
     font-size: 14px;
     color: #333;
     text-decoration: none;
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.user-dropdown .dropdown-menu .dropdown-item:hover {
+  }
+  
+  .user-dropdown .dropdown-menu .dropdown-item:hover {
     background-color: #f5f5f5;
     color: #007acc;
-}
-.nav-links li {
-    display: inline-block;
-    margin-right: 15px;
   }
   
-  .nav-links li a {
-    text-decoration: none;
-    color: #333;
+  /* Phần tìm kiếm */
+  .search-bar-container {
+    width: 100%;
+    background: #f9f9f9;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
   }
   
-  .nav-links li a:hover {
-    color: #007bff;
+  .search-bar {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px;
+  }
+  
+  .search-bar input {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .search-bar input:focus {
+    border-color: #007bff;
+  }
+  
+  .search-bar button {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .search-bar button:hover {
+    background-color: #0056b3;
   }
   
