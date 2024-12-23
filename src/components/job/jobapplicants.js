@@ -3,40 +3,51 @@ import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
-const JobApplicants = () => {
-  const { jobId } = useParams();
-  const navigate = useNavigate();
-  const [applicants, setApplicants] = useState([]);
-  const [loading, setLoading] = useState(true);
 
+const JobApplicants = () => {
+  const { jobId } = useParams(); // Lấy jobId từ URL
+  const navigate = useNavigate(); // Điều hướng người dùng
+  const [applicants, setApplicants] = useState([]); // Danh sách ứng viên
+  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
+
+
+  // Fetch danh sách ứng viên từ Firestore
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const docRef = doc(db, "jobs", jobId);
-        const jobSnap = await getDoc(docRef);
+        const docRef = doc(db, "jobs", jobId); // Tham chiếu đến tài liệu job trong Firestore
+        const jobSnap = await getDoc(docRef); // Lấy dữ liệu job
 
-        if (jobSnap.exists() && jobSnap.data().applicants) {
-          setApplicants(jobSnap.data().applicants);
+
+        if (jobSnap.exists()) {
+          const jobData = jobSnap.data();
+          setApplicants(jobData.applicants || []); // Lấy danh sách ứng viên, mặc định là mảng rỗng nếu không có
         } else {
-          console.error("No applicants found!");
+          console.error("No job found with this ID.");
         }
       } catch (error) {
         console.error("Error fetching applicants:", error);
       } finally {
-        setLoading(false);
+        setLoading(false); // Kết thúc trạng thái tải dữ liệu
       }
     };
+
 
     fetchApplicants();
   }, [jobId]);
 
+
+  // Nếu đang tải dữ liệu, hiển thị Loading
   if (loading) {
     return <div>Loading...</div>;
   }
 
+
+  // Nếu không có ứng viên, hiển thị thông báo
   if (applicants.length === 0) {
     return <div>No applicants found for this job.</div>;
   }
+
 
   return (
     <div className="container mt-4">
@@ -55,9 +66,9 @@ const JobApplicants = () => {
         <tbody>
           {applicants.map((applicant, index) => (
             <tr key={index}>
-              <td>{applicant.name || "N/A"}</td>
-              <td>{applicant.email}</td>
-              <td>{new Date(applicant.appliedAt).toLocaleString()}</td>
+              <td>{applicant.name || "N/A"}</td> {/* Hiển thị tên ứng viên */}
+              <td>{applicant.email}</td> {/* Hiển thị email ứng viên */}
+              <td>{new Date(applicant.appliedAt).toLocaleString()}</td> {/* Hiển thị ngày ứng tuyển */}
             </tr>
           ))}
         </tbody>
@@ -65,5 +76,6 @@ const JobApplicants = () => {
     </div>
   );
 };
+
 
 export default JobApplicants;

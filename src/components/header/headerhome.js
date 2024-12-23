@@ -1,17 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getAuth } from "firebase/auth";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase"; // Đảm bảo import đúng cấu hình Firebase
 import "./headerhome.css";
 
-const HeaderHome = ({ user, handleSearch }) => {
+
+const HeaderHome = ({ user }) => {
   const auth = getAuth();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [jobs, setJobs] = useState([]); // Danh sách công việc từ Firebase
+  const [filteredJobs, setFilteredJobs] = useState([]); // Kết quả tìm kiếm
+
+
+  // Lấy danh sách công việc từ Firebase
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "jobs"));
+        const jobsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setJobs(jobsData);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+
+
+    fetchJobs();
+  }, []);
+
 
   const toggleDropdown = () => {
-    setShowDropdown((prevState) => !prevState); // Đảm bảo logic toggle
+    setShowDropdown((prevState) => !prevState);
   };
+
 
   const handleLogout = () => {
     auth
@@ -25,10 +52,24 @@ const HeaderHome = ({ user, handleSearch }) => {
       });
   };
 
+
   const onSearchSubmit = (e) => {
     e.preventDefault();
-    handleSearch(searchQuery);
+    // Lọc danh sách công việc theo tên hoặc công ty
+    const results = jobs.filter(
+      (job) =>
+        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    if(searchQuery === "")
+      setFilteredJobs([]);
+    else
+      setFilteredJobs(results);
   };
+
+
+  const checkJobs = (e) => searchQuery !== "" && filteredJobs.length > 0;
+
 
   return (
     <>
@@ -82,8 +123,28 @@ const HeaderHome = ({ user, handleSearch }) => {
           </button>
         </form>
       </div>
+      {/* Hiển thị kết quả tìm kiếm */}
+      <div className="container mt-4">
+        {filteredJobs.length > 0 ? (
+          <div className="job-list">
+            {filteredJobs.map((job) => (
+              <div key={job.id} className="job-card">
+                <h3>
+                  <Link to={`/jobdetails/${job.id}`}>{job.title}</Link>
+                </h3>
+                <p>Company: {job.company}</p>
+                <p>Description: {job.description}</p>
+                <p>Location: {job.location}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          searchQuery && <p>No jobs found matching your search.</p>
+        )}
+      </div>
     </>
   );
 };
+
 
 export default HeaderHome;

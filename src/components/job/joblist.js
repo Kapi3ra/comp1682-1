@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
 import { AiFillEye, AiFillEdit, AiFillDelete, AiOutlineCheck } from "react-icons/ai";
 
+
 const JobList = ({ role, user }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const location = useLocation(); // Correctly define location
+
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -22,12 +26,16 @@ const JobList = ({ role, user }) => {
       }
     };
 
+
     fetchJobs();
-  }, []);
+    setSearchTerm("");
+  }, [location.pathname]); // Correctly set the dependency array
+
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this job?");
     if (!confirmDelete) return;
+
 
     try {
       await deleteDoc(doc(db, "jobs", id));
@@ -39,23 +47,41 @@ const JobList = ({ role, user }) => {
     }
   };
 
+
   const handleViewApplicants = (jobId) => {
     if (role === "manager") {
       navigate(`/jobapplicants/${jobId}`);
     }
   };
 
+
   const userAppliedToJob = (applicants) => {
     return applicants?.some((applicant) => applicant.email === user?.email);
   };
+
+
+  const filteredJobs = jobs.filter((job) =>
+    job.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
+
   return (
     <div className="container mt-4">
       <h1>Job Listings</h1>
+      <div className="mb-3">
+        <input
+          type="text"
+          placeholder="Search jobs by title..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="form-control"
+        />
+      </div>
       {role === "manager" && (
         <button
           className="btn btn-primary mb-3 d-flex align-items-center"
@@ -77,7 +103,7 @@ const JobList = ({ role, user }) => {
           </tr>
         </thead>
         <tbody>
-          {jobs.map((job) => (
+          {filteredJobs.map((job) => (
             <tr key={job.id}>
               <td>{job.title}</td>
               <td>{job.company}</td>
@@ -94,12 +120,12 @@ const JobList = ({ role, user }) => {
                     className="btn btn-success btn-sm"
                     onClick={() => handleViewApplicants(job.id)}
                   >
-                    View ({job.applicants?.length || 0}) {/* HR thấy số lượng ứng viên */}
+                    View ({job.applicants?.length || 0})
                   </button>
                 ) : userAppliedToJob(job.applicants) ? (
                   <AiOutlineCheck style={{ color: "green", fontSize: "1.5em" }} />
                 ) : (
-                  <span>No applicants</span> // Không có gì nếu chưa apply
+                  <span>No applicants</span>
                 )}
               </td>
               <td>
@@ -125,10 +151,18 @@ const JobList = ({ role, user }) => {
               </td>
             </tr>
           ))}
+          {filteredJobs.length === 0 && (
+            <tr>
+              <td colSpan="7" className="text-center">
+                No jobs found.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
   );
 };
+
 
 export default JobList;
