@@ -17,6 +17,7 @@ import JobList from "./components/job/joblist";
 import JobApplicants from "./components/job/jobapplicants";
 import Home from "./components/home"; // Import Home page
 import Profile from "./components/profile";
+import Statistics from "./components/statistics"; // Import Statistics component
 
 // Import Header
 import HeaderHome from "./components/header/headerhome";
@@ -80,6 +81,7 @@ const App = () => {
             path="/jobapplicants/:jobId"
             element={role === "manager" ? <JobApplicants /> : <Navigate to="/login" />}
           />
+          <Route path="/statistics" element={<Statistics user={user} role={role} />} />
           <Route path="/profile" element={<Profile user={user} />} />
         </Routes>
       </div>
